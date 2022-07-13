@@ -1,39 +1,41 @@
-const net = require("net");
-const readline = require("readline");
+const TYPE_YOUR_NAME = "Digite seu nome:"
+const TYPE_MESSAGE = "Digite sua mensagem:"
 
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout,
+const { io } = require("socket.io-client");
+const client = io("ws://localhost:3000", {});
+const readline = require("readline")
+
+const users = {}
+
+const sendMessage = (socketInstance) => {
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  })
+  return rl.addListener("line", (line) => {
+    socketInstance.emit("message", line, (response) => {
+      console.log(response);
+    })
+  })
+}
+
+const listenMessage = (socketInstance) => socketInstance.on("message", (arg, callback) => {
+  const userId = socketInstance.id
+  const name = users[userId]
+  if (name) {
+    console.log(`${name}: ${arg}`)
+    return callback(TYPE_MESSAGE);
+  }
+
+  users[userId] = arg.toUpperCase()
+  return callback(TYPE_MESSAGE)
 });
 
-const client = new net.Socket();
-const users = {}
-let count = 0;
+client.on("connect", () => {
+  console.log(TYPE_YOUR_NAME)
 
-client.connect(4000, "127.0.0.1", () => {
+  listenMessage(client)
 
+  sendMessage(client)
 
-  client.on("data", (data) => {
-    const body = JSON.parse(data.toString());
-
-    const savedUser = users[body.name];
-    if (savedUser) {
-      return console.log(`${savedUser.name}: ${body.text}`);
-    }
-    users[body.name] = body;
-    console.log(`${body.name} entrou`);
-  });
-  let name = "";
-  rl.addListener("line", (line) => {
-
-    if (!count) {
-      name = line.toUpperCase();
-      client.write(JSON.stringify({ text: line, name }));
-      console.log("Digite sua mensagem");
-      return count++
-
-    }
-
-    client.write(JSON.stringify({ text: line, name }));
-  });
 });

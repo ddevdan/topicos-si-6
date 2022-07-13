@@ -1,42 +1,41 @@
-const net = require("net");
+const TYPE_YOUR_NAME = "Digite seu nome:"
+const TYPE_MESSAGE = "Digite sua mensagem:"
+
+const { Server } = require("socket.io");
 const readline = require("readline");
 
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout,
+const server = new Server(3000);
+const users = {}
+
+const sendMessage = (socketInstance) => {
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  })
+  return rl.addListener("line", (line) => {
+    socketInstance.emit("message", line, (response) => {
+      console.log(response);
+    })
+  })
+}
+
+const listenMessage = (socketInstance) => socketInstance.on("message", (arg, callback) => {
+  const userId = socketInstance.id
+  const name = users[userId]
+  if (name) {
+    console.log(`${name}: ${arg}`)
+    return callback(TYPE_MESSAGE);
+  }
+  const newUserName = arg.toUpperCase()
+  users[userId] = newUserName
+  console.log(`${newUserName} entrou`)
+  return callback(TYPE_MESSAGE)
 });
 
-const users = {};
-let count = 0;
 
-const handleConnection = (socket) => {
-  socket.on("end", () => {
-    console.log("alguem se desconectou");
-  });
+server.on("connection", (socket) => {
+  console.log(TYPE_YOUR_NAME)
+  sendMessage(socket)
+  listenMessage(socket)
+});
 
-  rl.addListener("line", (line) => {
-
-    if (!count) {
-      name = line.toUpperCase();
-      socket.write(JSON.stringify({ text: line, name }));
-      console.log("Digite sua mensagem");
-      return count++
-
-    }
-
-    console.log("Digite sua mensagem");
-    socket.write(JSON.stringify({ text: line, name }));
-  });
-  socket.on("data", (data) => {
-    const body = JSON.parse(data.toString());
-    const savedUser = users[body.name];
-    if (savedUser) {
-      return console.log(`${savedUser.name}: ${body.text}`);
-    }
-    users[body.name] = body;
-    console.log(`${body.name} entrou`);
-  });
-};
-const server = net.createServer(handleConnection);
-
-server.listen(4000, "127.0.0.1");
