@@ -7,7 +7,7 @@ const readLines = (cb) => {
     output: process.stdout,
   });
 
-  return rl.addListener("line", (line) => {
+  rl.addListener("line", (line) => {
     cb(line)
   })
 }
