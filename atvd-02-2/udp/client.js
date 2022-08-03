@@ -1,6 +1,6 @@
 const dgram = require('dgram');
 const { Buffer } = require("buffer")
-const { sendUdpMessage } = require("../utils");
+const { sendUdpMessage } = require("../../utils");
 
 const client = dgram.createSocket('udp4');
 
