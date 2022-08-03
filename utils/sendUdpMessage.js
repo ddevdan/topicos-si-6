@@ -14,7 +14,8 @@ const sendUdpMessage = (instance, users) => {
 
       if (users) {
         Object.values(users).forEach((user) => {
-          instance.send(message, user.port)
+          const currentUserPort = user.port ?? user.rinfo.port
+          instance.send(message, currentUserPort)
         })
         return
       }

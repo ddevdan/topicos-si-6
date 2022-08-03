@@ -1,7 +1,10 @@
 const broadcastUdpMessage = ({ users, server, msg, rinfo }) => {
   Object.values(users).forEach((udpUser) => {
-    if (udpUser.port !== rinfo.port) {
-      server.send(msg, udpUser.port)
+    // thank you olga :D
+    const currentUserPort = udpUser.port ?? udpUser.rinfo.port
+    const isNotCurrentUser = currentUserPort !== rinfo.port
+    if (isNotCurrentUser) {
+      return server.send(msg, currentUserPort)
     }
   });
 }
