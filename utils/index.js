@@ -6,10 +6,12 @@ const readLines = require("./readLines")
 const sendUdpMessage = require("./sendUdpMessage")
 const broadcastUdpMessage = require("./broadcastUdpMessage")
 const calcBroadcastUdpMessage = require("./calcBroadcastUdpMessage")
+const calcBroadcastMessage = require("./calcBroadcastMessage")
 
 module.exports = {
   sendMessage, receiveData, onEndConnection,
   broadcastMessage, readLines, sendUdpMessage,
   broadcastUdpMessage,
-  calcBroadcastUdpMessage
+  calcBroadcastUdpMessage,
+  calcBroadcastMessage
 }
